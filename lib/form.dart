@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'foodDatabase.dart';
 import 'food_item.dart';
+import 'databaseQuery.dart';
+
 
 bool isNumeric(String s) {
   if (s == null) {
@@ -10,7 +14,7 @@ bool isNumeric(String s) {
 }
 
 class FormWidget extends StatefulWidget {
-  final FoodItem item;
+  final Food item;
 
   FormWidget({Key key, this.item});
 
@@ -241,14 +245,13 @@ class FormWidgetState extends State<FormWidget> {
                                   // If the form is valid, display a snackbar. In the real world,
                                   // you'd often call a server or save the information in a database.
 
-                                  FoodItem itemDatabse = FoodItem(name: name, weight: weight, carb: carb, fat: fat, protein: protein, type: type, isAdded: false);
+                                 FoodItem itemDatabse = FoodItem(name: name, weight: weight, carb: carb, fat: fat, protein: protein, type: type, isAdded: false);
 
                                   if(widget.item == null){
-                                    // TODO: add itemDatabase into database here. If it already exists then show toast or snackbar.
+                                    databaseQuery.db.newFood(new Food (name,type,weight,protein,fat,carb,0));
                                   }
-
                                   else{
-                                    // TODO: update itemDatabase here. I am guarenteing that the name wont be changed so you don't have to worry about that.
+                                    databaseQuery.db.updateFood(new Food (name,type,weight,protein,fat,carb,widget.item.isAdded));
                                   }
                                 }
                               },
@@ -274,6 +277,7 @@ class FormWidgetState extends State<FormWidget> {
                     child: Text("Delete", style: TextStyle(color: Colors.white),),
                     onPressed: () {
                       // TODO: DELETE item with data specified in widget.item.
+                      databaseQuery.db.deleteFood(widget.item.name);
                       print("Red shiny");
                     },
                   ),

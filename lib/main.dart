@@ -1,12 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'home.dart';
+import 'foodDatabase.dart';
 
-void main() {
+Future<void> main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  var status = await Permission.storage.status;
+  if (status.isUndetermined) {
+      // You can request multiple permissions at once.
+      Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+          Permission.camera,
+    ].request();
+    print(statuses[Permission.storage]); // it should print PermissionStatus.granted
+  }
+
+
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

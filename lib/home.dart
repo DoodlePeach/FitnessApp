@@ -1,36 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:circular_check_box/circular_check_box.dart';
+import 'foodDatabase.dart';
 import 'styles.dart';
 import 'food_item.dart';
 import 'form.dart';
-
-FoodItem item =
-    FoodItem(name: "Apple", type: "Fruit", weight: 12, isAdded: false, protein: 5, carb: 5, fat: 5);
-
+import 'databaseQuery.dart';
 
 class HomePageWidget extends StatefulWidget {
+
   @override
   _HomePageWidgetState createState() => _HomePageWidgetState();
 }
 
 class _HomePageWidgetState extends State<HomePageWidget> {
-  List<FoodItem> items = [
-    item,
-    item,
-    item,
-    item,
-    item,
-    item,
-    item,
-    item,
-    item,
-    item
-  ];
 
-  void refreshList(){
+  List<Food> items;
+  Future<void> refreshList() async {
     // TODO: Provide function to retrieve data from database here. After retrieval, assign it to items.
+    items = await databaseQuery.db.getAllFoods();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    databaseQuery.db.database;
+    refreshList();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +104,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
 
 class NutritionBarWidget extends StatefulWidget {
-  final List<FoodItem> items;
+  final List<Food> items;
 
   NutritionBarWidget({Key key, @required this.items});
 
@@ -194,7 +189,7 @@ class NutritionValueBarWidget extends StatelessWidget {
 }
 
 class FoodListWidget extends StatelessWidget {
-  final List<FoodItem> foodList;
+  final List<Food> foodList;
   final Function refreshList;
 
   FoodListWidget({Key key, @required this.foodList, @required this.refreshList});
@@ -202,7 +197,7 @@ class FoodListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: foodList.length,
+        itemCount: foodList.length != null ? foodList.length :0,
         padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
         itemBuilder: (BuildContext context, int index) {
           return FoodListElementWidget(item: foodList[index], refreshList: refreshList,);
@@ -211,7 +206,7 @@ class FoodListWidget extends StatelessWidget {
 }
 
 class FoodListElementWidget extends StatefulWidget {
-  final FoodItem item;
+  final Food item;
   final Function refreshList;
   FoodListElementWidget({Key key, @required this.item, @required this.refreshList});
 
@@ -220,6 +215,13 @@ class FoodListElementWidget extends StatefulWidget {
 }
 
 class _FoodListElementWidgetState extends State<FoodListElementWidget> {
+
+  bool convertIntToBool(int isAdded){
+    if(isAdded == 1)
+      return true;
+    else
+      return false;
+  }
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -233,15 +235,15 @@ class _FoodListElementWidgetState extends State<FoodListElementWidget> {
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
-        decoration: widget.item.isAdded ? listElementGradient : null,
+//        decoration: widget.item.isAdded==1 ,
         child: Row(
           children: [
             CircularCheckBox(
                 activeColor: Colors.green,
-                value: widget.item.isAdded,
+                value: widget.item.isAdded==1,
                 onChanged: (isTrue) {
                   setState(() {
-                    widget.item.isAdded = isTrue;
+                    databaseQuery.db.updateFood(Food(widget.item.name,widget.item.type,widget.item.weight,widget.item.protein,widget.item.fat,widget.item.carb,widget.item.isAdded));
                   });
                 }),
             Expanded(
