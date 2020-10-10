@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:circular_check_box/circular_check_box.dart';
 import 'foodDatabase.dart';
 import 'styles.dart';
-import 'food_item.dart';
 import 'form.dart';
 import 'databaseQuery.dart';
 
@@ -14,16 +13,20 @@ class HomePageWidget extends StatefulWidget {
 
 class _HomePageWidgetState extends State<HomePageWidget> {
 
-  List<Food> items;
+  List<Food> items = [];
   Future<void> refreshList() async {
     // TODO: Provide function to retrieve data from database here. After retrieval, assign it to items.
-    items = await databaseQuery.db.getAllFoods();
+    List<Food> retrieved = await DatabaseQuery.db.getAllFoods();
+
+    setState(() {
+      items = retrieved;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    databaseQuery.db.database;
+    DatabaseQuery.db.database;
     refreshList();
   }
   @override
@@ -117,14 +120,15 @@ class _NutritionBarWidgetState extends State<NutritionBarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    totalFats = totalProteins = totalCarbs = 0;
+
     for(int i = 0; i < widget.items.length; i++) {
-      print(widget.items[i]);
-
-      totalCarbs += widget.items[i].carb;
-      totalProteins += widget.items[i].protein;
-      totalFats += widget.items[i].fat;
+      if(widget.items[i].isAdded == 1){
+        totalCarbs += widget.items[i].carb;
+        totalProteins += widget.items[i].protein;
+        totalFats += widget.items[i].fat;
+      }
     }
-
       return Container(
         child: Container(
       child: Column(
@@ -197,7 +201,7 @@ class FoodListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: foodList.length != null ? foodList.length :0,
+        itemCount: foodList.length != null ? foodList.length : 0,
         padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
         itemBuilder: (BuildContext context, int index) {
           return FoodListElementWidget(item: foodList[index], refreshList: refreshList,);
@@ -235,7 +239,7 @@ class _FoodListElementWidgetState extends State<FoodListElementWidget> {
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
-//        decoration: widget.item.isAdded==1 ,
+        decoration: widget.item.isAdded == 1 ? listElementGradient : null,
         child: Row(
           children: [
             CircularCheckBox(
@@ -243,7 +247,9 @@ class _FoodListElementWidgetState extends State<FoodListElementWidget> {
                 value: widget.item.isAdded==1,
                 onChanged: (isTrue) {
                   setState(() {
-                    databaseQuery.db.updateFood(Food(widget.item.name,widget.item.type,widget.item.weight,widget.item.protein,widget.item.fat,widget.item.carb,widget.item.isAdded));
+                    widget.item.isAdded = isTrue ? 1 : 0;
+                    DatabaseQuery.db.updateFood(Food(widget.item.name,widget.item.type,widget.item.weight,widget.item.protein,widget.item.fat,widget.item.carb,widget.item.isAdded));
+                    widget.refreshList();
                   });
                 }),
             Expanded(

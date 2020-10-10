@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'home.dart';
-import 'foodDatabase.dart';
 
 Future<void> main() async {
 

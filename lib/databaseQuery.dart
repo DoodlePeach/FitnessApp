@@ -3,9 +3,9 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'foodDatabase.dart';
 
-class databaseQuery {
-  databaseQuery._();
-  static final databaseQuery db = databaseQuery._();
+class DatabaseQuery {
+  DatabaseQuery._();
+  static final DatabaseQuery db = DatabaseQuery._();
   static Database _database;
 
   Future<Database> get database async {
