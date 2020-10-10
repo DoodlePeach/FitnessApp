@@ -8,7 +8,7 @@ bool isNumeric(String s) {
   if (s == null) {
     return false;
   }
-  return double.parse(s, (e) => null) != null;
+  return int.tryParse(s) != null;
 }
 
 class FormWidget extends StatefulWidget {
