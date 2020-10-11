@@ -23,14 +23,12 @@ TextStyle cardTitleTextStyle = TextStyle(
     color: Colors.black
 );
 
-//
+// The specification for text style in the carbs, fat and protein bar.
 TextStyle foodBarTextStyle = TextStyle(
 fontSize: 17,
 fontFamily: 'Roboto',
 fontWeight: FontWeight.w300,
 color: Colors.white);
-
-
 
 // Specification for gradient of food list items.
 // This gradient is applied when the item is selected.
