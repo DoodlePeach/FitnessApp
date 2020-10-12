@@ -4,16 +4,16 @@ import 'foodDatabase.dart';
 import 'styles.dart';
 import 'form.dart';
 import 'databaseQuery.dart';
+import 'appbar.dart';
 
 class HomePageWidget extends StatefulWidget {
-
   @override
   _HomePageWidgetState createState() => _HomePageWidgetState();
 }
 
 class _HomePageWidgetState extends State<HomePageWidget> {
-
   List<Food> items = [];
+
   Future<void> refreshList() async {
     // TODO: Provide function to retrieve data from database here. After retrieval, assign it to items.
     List<Food> retrieved = await DatabaseQuery.db.getAllFoods();
@@ -29,82 +29,82 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     DatabaseQuery.db.database;
     refreshList();
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Fiverr"),
-      ),
+    return  Scaffold(
+      appBar: getAppBar(context),
       body: Container(
-        padding: EdgeInsets.all(5),
-        child: Column(
-          children: [
-            Card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
-                    child: Text(
-                      "Nutrition Totals",
-                      style: cardTitleTextStyle,
+          padding: EdgeInsets.all(5),
+          child: Column(
+            children: [
+              Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+                      child: Text(
+                        "Nutrition Totals",
+                        style: cardTitleTextStyle,
+                      ),
                     ),
-                  ),
-                  Divider(),
-                  NutritionBarWidget(items: items,),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Card(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                            child: Text(
-                              "Foods",
-                              style: cardTitleTextStyle,
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () {
-                              Navigator.push(context,
-                                MaterialPageRoute(builder: (context) {
-                                  return FormWidget();
-                                }),).then((value) => {
-                                  refreshList()
-                              });
-                            },
-                          )
-                        ],
-                      ),
-                      Divider(
-                        height: 1,
-                      ),
-                      Expanded(
-                          child: FoodListWidget(
-                            foodList: items,
-                            refreshList: refreshList,
-                          ))
-                    ],
-                  ),
+                    Divider(),
+                    NutritionBarWidget(
+                      items: items,
+                    ),
+                  ],
                 ),
               ),
-            )
-          ],
+              Expanded(
+                child: Card(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                              child: Text(
+                                "Foods",
+                                style: cardTitleTextStyle,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) {
+                                    return FormWidget();
+                                  }),
+                                ).then((value) => {refreshList()});
+                              },
+                            )
+                          ],
+                        ),
+                        Divider(
+                          height: 1,
+                        ),
+                        Expanded(
+                            child: FoodListWidget(
+                          foodList: items,
+                          refreshList: refreshList,
+                        ))
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
-      ),
     );
   }
 }
-
 
 class NutritionBarWidget extends StatefulWidget {
   final List<Food> items;
@@ -122,14 +122,14 @@ class _NutritionBarWidgetState extends State<NutritionBarWidget> {
   Widget build(BuildContext context) {
     totalFats = totalProteins = totalCarbs = 0;
 
-    for(int i = 0; i < widget.items.length; i++) {
-      if(widget.items[i].isAdded == 1){
+    for (int i = 0; i < widget.items.length; i++) {
+      if (widget.items[i].isAdded == 1) {
         totalCarbs += widget.items[i].carb;
         totalProteins += widget.items[i].protein;
         totalFats += widget.items[i].fat;
       }
     }
-      return Container(
+    return Container(
         child: Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -196,7 +196,8 @@ class FoodListWidget extends StatelessWidget {
   final List<Food> foodList;
   final Function refreshList;
 
-  FoodListWidget({Key key, @required this.foodList, @required this.refreshList});
+  FoodListWidget(
+      {Key key, @required this.foodList, @required this.refreshList});
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +205,10 @@ class FoodListWidget extends StatelessWidget {
         itemCount: foodList.length != null ? foodList.length : 0,
         padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
         itemBuilder: (BuildContext context, int index) {
-          return FoodListElementWidget(item: foodList[index], refreshList: refreshList,);
+          return FoodListElementWidget(
+            item: foodList[index],
+            refreshList: refreshList,
+          );
         });
   }
 }
@@ -212,30 +216,34 @@ class FoodListWidget extends StatelessWidget {
 class FoodListElementWidget extends StatefulWidget {
   final Food item;
   final Function refreshList;
-  FoodListElementWidget({Key key, @required this.item, @required this.refreshList});
+
+  FoodListElementWidget(
+      {Key key, @required this.item, @required this.refreshList});
 
   @override
   _FoodListElementWidgetState createState() => _FoodListElementWidgetState();
 }
 
 class _FoodListElementWidgetState extends State<FoodListElementWidget> {
-
-  bool convertIntToBool(int isAdded){
-    if(isAdded == 1)
+  bool convertIntToBool(int isAdded) {
+    if (isAdded == 1)
       return true;
     else
       return false;
   }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
-        Navigator.push(context,
+      onTap: () {
+        Navigator.push(
+          context,
           MaterialPageRoute(builder: (context) {
-            return FormWidget(item: widget.item,);
-          }),).then((value) => {
-            widget.refreshList()
-        });
+            return FormWidget(
+              item: widget.item,
+            );
+          }),
+        ).then((value) => {widget.refreshList()});
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
@@ -244,11 +252,18 @@ class _FoodListElementWidgetState extends State<FoodListElementWidget> {
           children: [
             CircularCheckBox(
                 activeColor: Colors.green,
-                value: widget.item.isAdded==1,
+                value: widget.item.isAdded == 1,
                 onChanged: (isTrue) {
                   setState(() {
                     widget.item.isAdded = isTrue ? 1 : 0;
-                    DatabaseQuery.db.updateFood(Food(widget.item.name,widget.item.type,widget.item.weight,widget.item.protein,widget.item.fat,widget.item.carb,widget.item.isAdded));
+                    DatabaseQuery.db.updateFood(Food(
+                        widget.item.name,
+                        widget.item.type,
+                        widget.item.weight,
+                        widget.item.protein,
+                        widget.item.fat,
+                        widget.item.carb,
+                        widget.item.isAdded));
                     widget.refreshList();
                   });
                 }),
@@ -257,8 +272,8 @@ class _FoodListElementWidgetState extends State<FoodListElementWidget> {
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
                   child: Container(
-                      child:
-                          Image.asset('images/dummy.jpg', fit: BoxFit.contain))),
+                      child: Image.asset('images/dummy.jpg',
+                          fit: BoxFit.contain))),
             ),
             Expanded(
               child: Container(
