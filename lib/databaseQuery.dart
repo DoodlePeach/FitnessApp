@@ -1,6 +1,7 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'Diet.dart';
 import 'foodDatabase.dart';
 
 class DatabaseQuery {
@@ -24,18 +25,47 @@ class DatabaseQuery {
               "fat int,"
               "protein int,"
               "carb int,"
+              "image TEXT,"
               "isAdded int"
              ")");
-        });
+
+            await db.execute("CREATE TABLE Diet ("
+                "fat int,"
+                "protein int,"
+                "carb int"
+                ")");
+         });
   }
 
-  newFood(Food newClient) async {
+  getDiet() async {
+    final db = await database;
+    var res = await db.query("Diet");
+    List<Diet> list = res.isNotEmpty ? res.map((c) => Diet.fromMap(c)).toList() : [];
+    return list;
+  }
+
+  newDiet() async {
+    final db = await database;
+    var res = await db.insert("Diet", Diet(0,0,0).toMap());
+  }
+
+  updateDiet(Diet newClient,int previousprotein) async {
+    final db = await database;
+    var res = await db.update("Diet", newClient.toMap(),
+          where: "protein = ?", whereArgs: [previousprotein]);
+    }
+
+
+
+    newFood(Food newClient) async {
     final db = await database;
     try{
       var res = await db.insert("Food", newClient.toMap());
+
       Fluttertoast.showToast(msg: "Added");
      }
     on DatabaseException {
+
       Fluttertoast.showToast(msg: "Already Exists in your Diet");
     }
   }
@@ -48,12 +78,13 @@ class DatabaseQuery {
     return list;
   }
 
-  updateFood(Food newClient) async {
+  updateFood(Food newClient,bool toastOption) async {
     final db = await database;
     try{
       var res = await db.update("Food", newClient.toMap(),
           where: "name = ?", whereArgs: [newClient.name]);
-      Fluttertoast.showToast(msg: "Updated Successfully");
+      if(toastOption)
+        Fluttertoast.showToast(msg: "Updated Successfully");
     }   on DatabaseException {
       Fluttertoast.showToast(msg: "Not Updated");
     }

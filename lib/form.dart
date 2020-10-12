@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'foodDatabase.dart';
 import 'databaseQuery.dart';
 import 'styles.dart';
-import 'appbar.dart';
 
 final double weightMaxValue = 1000;
 final double weightMinValue = 1;
@@ -14,6 +13,30 @@ bool isNumeric(String s) {
   }
   return int.tryParse(s) != null;
 }
+
+Future<String> _takePicture(bool imageFromGallery) async {
+  var imageFile;
+
+  if(imageFromGallery){
+    imageFile = await  ImagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50
+    );
+  }
+  else {
+    imageFile = await ImagePicker.pickImage(source: ImageSource.camera,
+      maxWidth: 600,
+    );
+  }
+
+  if (imageFile == null) {
+    return "";
+  }
+  final appDir = await getApplicationDocumentsDirectory();
+  final fileName = basename(imageFile.path);
+  final savedImage = await imageFile.copy('${appDir.path}/$fileName');
+  return savedImage.toString();
+}
+
 
 class FormWidget extends StatefulWidget {
   final Food item;
@@ -26,6 +49,10 @@ class FormWidget extends StatefulWidget {
   }
 }
 
+
+
+// Define a corresponding State class.
+// This class holds data related to the form.
 class FormWidgetState extends State<FormWidget> {
   final _formKey = GlobalKey<FormState>();
   // These are the fields that are going to be inserted into the database.
@@ -223,6 +250,38 @@ class FormWidgetState extends State<FormWidget> {
 
                               getWeightInputWidget(),
 
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text("Weight"),
+                                    ],
+                                  ),
+
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Container(
+                                        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                                        color: Colors.green,
+                                        child: Text(weight.round().toString() + "g", style: TextStyle(color: Colors.white),)
+                                    ),
+                                  ),
+                                  Slider(
+                                    min: weightMinValue,
+                                    max: weightMaxValue,
+                                    value: weight,
+                                    label: weight.round().toString(),
+                                    onChanged: (value){
+                                      setState(() {
+                                        weight = value;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
 
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 0, vertical: 5),
@@ -319,61 +378,65 @@ class FormWidgetState extends State<FormWidget> {
                                 ),
                               ),
 
-                              Row(children: [
-                                Expanded(
-                                  child: RaisedButton(
-                                      color: Colors.green,
-                                      onPressed: () {
-                                        // Validate returns true if the form is valid, otherwise false.
-                                        if (_formKey.currentState.validate()) {
-                                          // If the form is valid, display a snackbar. In the real world,
-                                          // you'd often call a server or save the information in a database.
+                            Row(children: [
+                              Expanded(
+                                child: RaisedButton(
+                                    color: Colors.green,
+                                    onPressed: ()  async {
+                                      // Validate returns true if the form is valid, otherwise false.
+                                      if (_formKey.currentState.validate()) {
+                                        // If the form is valid, display a snackbar. In the real world,
+                                        // you'd often call a server or save the information in a database.
 
-                                          // FoodItem itemDatabse = FoodItem(name: name, weight: weight, carb: carb, fat: fat, protein: protein, type: type, isAdded: false);
+                                        // FoodItem itemDatabse = FoodItem(name: name, weight: weight, carb: carb, fat: fat, protein: protein, type: type, isAdded: false);
+                                        String imagePath;
 
-                                          if(widget.item == null){
-                                            DatabaseQuery.db.newFood(new Food (name,type,weight.round().toInt() ,protein,fat,carb,0));
-                                          }
-                                          else{
-                                            DatabaseQuery.db.updateFood(new Food (name,type, weight.round().toInt(),protein,fat,carb,widget.item.isAdded));
-                                          }
+                                        if(widget.item == null){
+                                          imagePath = await _takePicture(false);
+                                          DatabaseQuery.db.newFood(new Food (name,type,weight.toInt() ,protein,fat,carb,imagePath,0));
                                         }
-                                      },
-                                      child: widget.item == null
-                                          ? Text(
-                                              'Add',
-                                              style: TextStyle(color: Colors.white),
-                                            )
-                                          : Text("Update",
-                                              style: TextStyle(color: Colors.white))),
-                                ),
-                              ]
-                              )
-                            ]
-                        )
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: RaisedButton(
+                                        else{
 
-                            color: Colors.red,
-                            child: Text("Delete", style: TextStyle(color: Colors.white),),
-                            onPressed: () {
-                              // TODO: DELETE item with data specified in widget.item.
-                              DatabaseQuery.db.deleteFood(widget.item.name);
-                              Navigator.pop(context);
-                            },
-                          ),
-                        )
-                      ],
-                    )
-                  ],
-                ),
+                                          imagePath = await _takePicture(false);
+                                          DatabaseQuery.db.updateFood(new Food (name,type, weight.toInt(),protein,fat,carb,imagePath,widget.item.isAdded),true);
+                                        }
+                                      }
+                                    },
+                                    child: widget.item == null
+                                        ? Text(
+                                            'Add',
+                                            style: TextStyle(color: Colors.white),
+                                          )
+                                        : Text("Update",
+                                            style: TextStyle(color: Colors.white))),
+                              ),
+                            ]
+                            )
+                          ]
+                      )
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: RaisedButton(
+
+                          color: Colors.red,
+                          child: Text("Delete", style: TextStyle(color: Colors.white),),
+                          onPressed: () {
+                            // TODO: DELETE item with data specified in widget.item.
+                            DatabaseQuery.db.deleteFood(widget.item.name);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      )
+                    ],
+                  )
+                ],
               ),
             ),
-          ),),
+          ),
+        ),
+      ),
     );
   }
 }
-
