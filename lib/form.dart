@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'foodDatabase.dart';
 import 'databaseQuery.dart';
 import 'styles.dart';
+import 'package:path/path.dart';
 
 final double weightMaxValue = 1000;
 final double weightMinValue = 1;
@@ -14,6 +17,30 @@ bool isNumeric(String s) {
   return int.tryParse(s) != null;
 }
 
+Future<String> _takePicture(bool imageFromGallery) async {
+  var imageFile;
+
+  if(imageFromGallery){
+    imageFile = await  ImagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50
+    );
+  }
+  else {
+    imageFile = await ImagePicker.pickImage(source: ImageSource.camera,
+      maxWidth: 600,
+    );
+  }
+
+  if (imageFile == null) {
+    return "";
+  }
+  final appDir = await getApplicationDocumentsDirectory();
+  final fileName = basename(imageFile.path);
+  final savedImage = await imageFile.copy('${appDir.path}/$fileName');
+  return savedImage.toString();
+}
+
+
 class FormWidget extends StatefulWidget {
   final Food item;
 
@@ -24,6 +51,8 @@ class FormWidget extends StatefulWidget {
     return FormWidgetState();
   }
 }
+
+
 
 // Define a corresponding State class.
 // This class holds data related to the form.
@@ -290,19 +319,23 @@ class FormWidgetState extends State<FormWidget> {
                               Expanded(
                                 child: RaisedButton(
                                     color: Colors.green,
-                                    onPressed: () {
+                                    onPressed: ()  async {
                                       // Validate returns true if the form is valid, otherwise false.
                                       if (_formKey.currentState.validate()) {
                                         // If the form is valid, display a snackbar. In the real world,
                                         // you'd often call a server or save the information in a database.
 
                                         // FoodItem itemDatabse = FoodItem(name: name, weight: weight, carb: carb, fat: fat, protein: protein, type: type, isAdded: false);
+                                        String imagePath;
 
                                         if(widget.item == null){
-                                          DatabaseQuery.db.newFood(new Food (name,type,weight.toInt() ,protein,fat,carb,0));
+                                          imagePath = await _takePicture(false);
+                                          DatabaseQuery.db.newFood(new Food (name,type,weight.toInt() ,protein,fat,carb,imagePath,0));
                                         }
                                         else{
-                                          DatabaseQuery.db.updateFood(new Food (name,type, weight.toInt(),protein,fat,carb,widget.item.isAdded));
+
+                                          imagePath = await _takePicture(false);
+                                          DatabaseQuery.db.updateFood(new Food (name,type, weight.toInt(),protein,fat,carb,imagePath,widget.item.isAdded),true);
                                         }
                                       }
                                     },

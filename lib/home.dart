@@ -1,9 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:circular_check_box/circular_check_box.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'Diet.dart';
 import 'foodDatabase.dart';
 import 'styles.dart';
 import 'form.dart';
 import 'databaseQuery.dart';
+
+Future<String>  _takePicture(bool imageFromGallery) async {
+
+  var imageFile;
+
+  if(imageFromGallery){
+    imageFile = await  ImagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50
+    );
+  }
+  else {
+    imageFile = await ImagePicker.pickImage(source: ImageSource.camera,
+      maxWidth: 600,
+    );
+  }
+
+  if (imageFile == null) {
+    return "";
+  }
+  final appDir = await getApplicationDocumentsDirectory();
+  final fileName = basename(imageFile.path);
+  final savedImage = await imageFile.copy('${appDir.path}/$fileName');
+  return savedImage.toString();
+}
+
 
 class HomePageWidget extends StatefulWidget {
 
@@ -17,6 +46,13 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   Future<void> refreshList() async {
     // TODO: Provide function to retrieve data from database here. After retrieval, assign it to items.
     List<Food> retrieved = await DatabaseQuery.db.getAllFoods();
+    List<Diet> abcd = await DatabaseQuery.db.getDiet();
+    
+    if(abcd.length==0)
+      abcd = await DatabaseQuery.db.newDiet();
+
+    //await DatabaseQuery.db.updateDiet(Diet(10,20,30), 0);
+
 
     setState(() {
       items = retrieved;
@@ -246,9 +282,10 @@ class _FoodListElementWidgetState extends State<FoodListElementWidget> {
                 activeColor: Colors.green,
                 value: widget.item.isAdded==1,
                 onChanged: (isTrue) {
-                  setState(() {
+                  setState(() async {
                     widget.item.isAdded = isTrue ? 1 : 0;
-                    DatabaseQuery.db.updateFood(Food(widget.item.name,widget.item.type,widget.item.weight,widget.item.protein,widget.item.fat,widget.item.carb,widget.item.isAdded));
+                    String image = await _takePicture(false);
+                    DatabaseQuery.db.updateFood(Food(widget.item.name,widget.item.type,widget.item.weight,widget.item.protein,widget.item.fat,widget.item.carb,image,widget.item.isAdded),false);
                     widget.refreshList();
                   });
                 }),
