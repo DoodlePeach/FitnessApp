@@ -153,7 +153,7 @@ class FormWidgetState extends State<FormWidget> {
                 hintText: 'Enter the item\'s weight',
               ),
 
-              initialValue: widget.item != null && isWeightDirty
+              initialValue: widget.item == null || isWeightDirty
                   ? weight.round().toInt().toString()
                   : widget.item.weight.toString(),
 
@@ -195,7 +195,7 @@ class FormWidgetState extends State<FormWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Add Item",
+                          "Add/Update Item",
                           style: cardTitleTextStyle,
                         ),
                         Container(
