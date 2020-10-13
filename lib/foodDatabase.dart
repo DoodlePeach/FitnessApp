@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-
 class Food {
   int protein,fat,carb,weight;
   String name,type;

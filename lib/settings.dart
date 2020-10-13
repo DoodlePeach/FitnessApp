@@ -1,3 +1,5 @@
+import 'package:fitness_app/Diet.dart';
+import 'package:fitness_app/databaseQuery.dart';
 import 'package:flutter/material.dart';
 import 'styles.dart';
 import 'appbar.dart';
@@ -21,7 +23,7 @@ class _SettingsFormWidgetState extends State<SettingsFormWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: getAppBar(context),
+      appBar: getAppBar(context, null),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(5),
@@ -74,7 +76,7 @@ class _SettingsFormWidgetState extends State<SettingsFormWidget> {
                                             ),
                                             initialValue: 1.toString(),
                                             validator: (value) {
-                                              if (isNumeric(value)) {
+                                              if (!isNumeric(value)) {
                                                 return 'Please enter a valid number';
                                               }
 
@@ -101,7 +103,7 @@ class _SettingsFormWidgetState extends State<SettingsFormWidget> {
                                             ),
                                             initialValue: 1.toString(),
                                             validator: (value) {
-                                              if (isNumeric(value)) {
+                                              if (!isNumeric(value)) {
                                                 return 'Please enter a valid number';
                                               }
 
@@ -128,7 +130,7 @@ class _SettingsFormWidgetState extends State<SettingsFormWidget> {
                                             ),
                                             initialValue: 1.toString(),
                                             validator: (value) {
-                                              if (isNumeric(value)) {
+                                              if (!isNumeric(value)) {
                                                 return 'Please enter a valid number';
                                               }
 
@@ -143,7 +145,7 @@ class _SettingsFormWidgetState extends State<SettingsFormWidget> {
                                   Expanded(
                                     child: RaisedButton(
                                         color: Colors.green,
-                                        onPressed: () {
+                                        onPressed: () async {
                                           // Validate returns true if the form is valid, otherwise false.
                                           if (_formKey.currentState
                                               .validate()) {
@@ -153,6 +155,10 @@ class _SettingsFormWidgetState extends State<SettingsFormWidget> {
                                             // FoodItem itemDatabse = FoodItem(name: name, weight: weight, carb: carb, fat: fat, protein: protein, type: type, isAdded: false);
 
                                             // TODO: Update values of protien, carb, and fat here.
+
+                                            await DatabaseQuery.db.updateDiet(Diet(protien, fat, carb));
+
+                                            Navigator.pop(context);
                                           }
                                         },
                                         child: Text("Update",
