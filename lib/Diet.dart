@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Diet{
   int protein,fat,carb;
 

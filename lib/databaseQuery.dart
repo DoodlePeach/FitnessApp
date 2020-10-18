@@ -38,7 +38,7 @@ class DatabaseQuery {
     });
   }
 
-  getDiet() async {
+  Future<List<Diet>> getDiet() async {
     final db = await database;
     var res = await db.query("Diet");
     List<Diet> list =
@@ -51,7 +51,7 @@ class DatabaseQuery {
     var res = await db.insert("Diet", Diet(0, 0, 0).toMap());
   }
 
-  updateDiet(Diet newDiet) async {
+  Future<void> updateDiet(Diet newDiet) async {
     final db = await database;
     await db.rawDelete("Delete FROM Diet");
     await db.insert("Diet", newDiet.toMap());
@@ -68,7 +68,7 @@ class DatabaseQuery {
     }
   }
 
-  getAllFoods() async {
+  Future<List<Food>> getAllFoods() async {
     final db = await database;
     var res = await db.query("Food");
     List<Food> list =
@@ -87,10 +87,10 @@ class DatabaseQuery {
     }
   }
 
-  deleteFood(String name) async {
+  deleteFood(Food item) async {
     final db = await database;
     try {
-      db.delete("Food", where: "name = ?", whereArgs: [name]);
+      db.delete("Food", where: "name = ?", whereArgs: [item.name]);
       Fluttertoast.showToast(msg: "Deleted Successfuly");
     } on DatabaseException {
       Fluttertoast.showToast(msg: "Not Deleted");

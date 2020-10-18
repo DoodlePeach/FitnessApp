@@ -1,12 +1,11 @@
+import 'package:fitness_app/FoodProvider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'foodDatabase.dart';
-import 'databaseQuery.dart';
 import 'styles.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'appbar.dart';
+import 'package:provider/provider.dart';
 
 final double weightMaxValue = 1000;
 final double weightMinValue = 1;
@@ -31,7 +30,15 @@ Future<String> _takePicture(bool imageFromGallery) async {
     );
   }
 
-  return imageFile.path.toString();
+  // imageFile may be null if user doses not select anything and backs out of
+  // the selection prompt.
+  if(imageFile != null){
+    return imageFile.path.toString();
+  }
+
+  else{
+    return "";
+  }
 }
 
 class FormWidget extends StatefulWidget {
@@ -72,9 +79,7 @@ class FormWidgetState extends State<FormWidget> {
     if (widget.item != null) {
       path = widget.item.image;
       type = widget.item.type;
-    }
-
-    else{
+    } else {
       type = "Carb";
     }
   }
@@ -180,7 +185,7 @@ class FormWidgetState extends State<FormWidget> {
   Widget build(BuildContext context) {
     // Build a Form widget using the _formKey created above.
     return Scaffold(
-      appBar: getAppBar(context, null),
+      appBar: getAppBar(context),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(5),
@@ -266,8 +271,8 @@ class FormWidgetState extends State<FormWidget> {
                                   Text("Type"),
 
                                   // Add TextFormFields and RaisedButton here.
-                                  Row(
-                                    children: [Expanded(
+                                  Row(children: [
+                                    Expanded(
                                       child: DropdownButton<String>(
                                         isExpanded: true,
                                         value: type,
@@ -283,17 +288,20 @@ class FormWidgetState extends State<FormWidget> {
                                             type = newValue;
                                           });
                                         },
-                                        items: <String>['Carb', 'Protein', 'Fat']
-                                            .map<DropdownMenuItem<String>>(
-                                                (String value) {
+                                        items: <String>[
+                                          'Carb',
+                                          'Protein',
+                                          'Fat'
+                                        ].map<DropdownMenuItem<String>>(
+                                            (String value) {
                                           return DropdownMenuItem<String>(
                                             value: value,
                                             child: Text(value),
                                           );
                                         }).toList(),
                                       ),
-                                    ),]
-                                  )
+                                    ),
+                                  ])
                                 ],
                               ),
                             ),
@@ -397,29 +405,21 @@ class FormWidgetState extends State<FormWidget> {
                             ),
                             Row(children: [
                               Expanded(
-                                child: RaisedButton(
-                                    color: Colors.green,
-                                    onPressed: () async {
-                                      // Validate returns true if the form is valid, otherwise false.
-                                      if (_formKey.currentState.validate()) {
-                                        // If the form is valid, display a snackbar. In the real world,
-                                        // you'd often call a server or save the information in a database.
+                                child: Consumer<FoodModel>(
+                                  builder: (context, model, child) {
+                                    return RaisedButton(
+                                        color: Colors.green,
+                                        onPressed: () async {
+                                          // Validate returns true if the form is valid, otherwise false.
+                                          if (_formKey.currentState
+                                              .validate()) {
+                                            // If the form is valid, display a snackbar. In the real world,
+                                            // you'd often call a server or save the information in a database.
 
-                                        // FoodItem itemDatabse = FoodItem(name: name, weight: weight, carb: carb, fat: fat, protein: protein, type: type, isAdded: false);
+                                            // FoodItem itemDatabse = FoodItem(name: name, weight: weight, carb: carb, fat: fat, protein: protein, type: type, isAdded: false);
 
-                                        if (widget.item == null) {
-                                          DatabaseQuery.db.newFood(new Food(
-                                              name,
-                                              type,
-                                              weight.toInt(),
-                                              protein,
-                                              fat,
-                                              carb,
-                                              path,
-                                              0));
-                                        } else {
-                                          DatabaseQuery.db.updateFood(
-                                              new Food(
+                                            if (widget.item == null) {
+                                              model.insert(Food(
                                                   name,
                                                   type,
                                                   weight.toInt(),
@@ -427,36 +427,51 @@ class FormWidgetState extends State<FormWidget> {
                                                   fat,
                                                   carb,
                                                   path,
-                                                  widget.item.isAdded),
-                                              true);
-                                        }
-                                      }
-                                    },
-                                    child: widget.item == null
-                                        ? Text(
-                                            'Add',
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          )
-                                        : Text("Update",
-                                            style: TextStyle(
-                                                color: Colors.white))),
+                                                  0));
+                                            } else {
+                                              model.update(Food(
+                                                  name,
+                                                  type,
+                                                  weight.toInt(),
+                                                  protein,
+                                                  fat,
+                                                  carb,
+                                                  path,
+                                                  widget.item.isAdded));
+                                            }
+                                          }
+                                        },
+                                        child: widget.item == null
+                                            ? Text(
+                                                'Add',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )
+                                            : Text("Update",
+                                                style: TextStyle(
+                                                    color: Colors.white)));
+                                  },
+                                ),
                               ),
                             ])
                           ])),
                   Row(
                     children: [
                       Expanded(
-                        child: RaisedButton(
-                          color: Colors.red,
-                          child: Text(
-                            "Delete",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          onPressed: () {
-                            // TODO: DELETE item with data specified in widget.item.
-                            DatabaseQuery.db.deleteFood(widget.item.name);
-                            Navigator.pop(context);
+                        child: Consumer<FoodModel>(
+                          builder: (context, model, child) {
+                            return RaisedButton(
+                              color: Colors.red,
+                              child: Text(
+                                "Delete",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              onPressed: () {
+                                // TODO: DELETE item with data specified in widget.item.
+                                model.delete(widget.item);
+                                Navigator.pop(context);
+                              },
+                            );
                           },
                         ),
                       )

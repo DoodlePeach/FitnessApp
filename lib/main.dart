@@ -1,5 +1,8 @@
+import 'package:fitness_app/DietProvider.dart';
+import 'package:fitness_app/FoodProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'home.dart';
 
 Future<void> main() async {
@@ -16,12 +19,16 @@ Future<void> main() async {
         Permission.storage]); // it should print PermissionStatus.granted
   }
 
-  runApp(MyApp());
+  runApp( MultiProvider(
+    providers: [
+      ChangeNotifierProvider<FoodModel>(create: (context) => FoodModel()),
+      ChangeNotifierProvider<DietModel>(create: (context) => DietModel())],
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -1,6 +1,7 @@
 import 'package:fitness_app/Diet.dart';
-import 'package:fitness_app/databaseQuery.dart';
+import 'package:fitness_app/DietProvider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'styles.dart';
 import 'appbar.dart';
 
@@ -23,7 +24,7 @@ class _SettingsFormWidgetState extends State<SettingsFormWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: getAppBar(context, null),
+      appBar: getAppBar(context),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(5),
@@ -156,7 +157,7 @@ class _SettingsFormWidgetState extends State<SettingsFormWidget> {
 
                                             // TODO: Update values of protien, carb, and fat here.
 
-                                            await DatabaseQuery.db.updateDiet(Diet(protien, fat, carb));
+                                            Provider.of<DietModel>(context, listen: false).update(Diet(protien, fat, carb));
 
                                             Navigator.pop(context);
                                           }

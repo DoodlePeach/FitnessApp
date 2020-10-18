@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'settings.dart';
 
-AppBar getAppBar(BuildContext context, Function refreshNutritionBar){
+AppBar getAppBar(BuildContext context){
   return AppBar(
     title: Text("Fiverr"),
     actions: [
@@ -12,10 +12,7 @@ AppBar getAppBar(BuildContext context, Function refreshNutritionBar){
               builder: (context) {
                 return SettingsFormWidget();
               },
-            )).then((value){
-              if(refreshNutritionBar != null)
-              {refreshNutritionBar();}
-            });
+            ));
           })
     ],
   );
