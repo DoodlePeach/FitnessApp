@@ -4,7 +4,7 @@ A personal health related fitness application designed for a Fiverr client. This
 
 ## Images
 <p align="middle" float="left">
-  <img src="images/img3.jpg" width="20%" />
-  <img src="images/img1.jpg" width="20%" /> 
-  <img src="images/img2.jpg" width="20%" />
+  <img src="images/img3.jpg" width="27%" />
+  <img src="images/img1.jpg" width="27%" /> 
+  <img src="images/img2.jpg" width="27%" />
 </p
